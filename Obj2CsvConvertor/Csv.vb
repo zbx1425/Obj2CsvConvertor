@@ -14,12 +14,12 @@ Public Class Csv
             tu = t.u : tv = t.v
         End Sub
 
-        'Public Overrides Function Equals(ByVal obj As Object) As Boolean
-        '    If obj.GetType IsNot GetType(Vertex) Then Return False
-        '    Return obj.vx = Me.vx And obj.vy = Me.vy And obj.vz = Me.vz And _
-        '            obj.nx = Me.nx And obj.ny = Me.ny And obj.nz = Me.nz And _
-        '            obj.tu = Me.tu And obj.tv = Me.tv
-        'End Function
+        Public Overrides Function Equals(ByVal obj As Object) As Boolean
+            If obj.GetType IsNot GetType(Vertex) Then Return False
+            Return obj.vx = Me.vx AndAlso obj.vy = Me.vy AndAlso obj.vz = Me.vz AndAlso _
+            If(Double.IsNaN(Me.nx), Double.IsNaN(obj.nx), obj.nx = Me.nx AndAlso obj.ny = Me.ny AndAlso obj.nz = Me.nz) AndAlso _
+            If(Double.IsNaN(Me.tu), Double.IsNaN(obj.tu), obj.tu = Me.tu AndAlso obj.tv = Me.tv)
+        End Function
     End Class
 
     Public Class Face
@@ -50,6 +50,7 @@ Public Class Csv
                     vis.Add(Vertices.IndexOf(vt))
                 Next
                 Faces.Add(New Face(vis))
+                If Faces.Count Mod 100 = 0 Then Console.WriteLine("已载入 {0} / {1} 个面。", Faces.Count, fl.Count)
             Next
             Material = m
         End Sub
