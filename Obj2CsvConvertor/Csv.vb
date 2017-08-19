@@ -44,10 +44,12 @@ Public Class Csv
                     Dim na As Obj.Normal = If(Current.NormalIndices(i) = -1, New Obj.Normal(), o.Normals(Current.NormalIndices(i)))
                     Dim ta As Obj.TextureCoordinate = If(Current.TextureCoordinateIndices(i) = -1, New Obj.TextureCoordinate(), o.TextureCoordinates(Current.TextureCoordinateIndices(i)))
                     Dim vt As Vertex = New Vertex(va, na, ta)
-                    If Not Vertices.Contains(vt) Then
+                    Dim idx As Integer = Vertices.IndexOf(vt)
+                    If idx = -1 Then
+                        idx = Vertices.Count
                         Vertices.Add(vt)
                     End If
-                    vis.Add(Vertices.IndexOf(vt))
+                    vis.Add(idx)
                 Next
                 Faces.Add(New Face(vis))
                 If Faces.Count Mod 100 = 0 Then Console.WriteLine("已载入 {0} / {1} 个面。", Faces.Count, fl.Count)

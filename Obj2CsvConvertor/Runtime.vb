@@ -18,6 +18,7 @@
                 End
             End If
         End If
+        Dim starttime As Date = Now
         Try
             If Not IO.File.Exists(Input) Then Throw New IO.FileNotFoundException("未找到输入文件，请检查拼写错误。")
             IO.Directory.SetCurrentDirectory(My.Computer.FileSystem.GetParentPath(Input))
@@ -50,6 +51,7 @@
             Console.WriteLine(ex.Message)
             Console.WriteLine("转换失败。")
         End Try
+        Console.WriteLine("共用时 {0} 秒。", DateDiff(DateInterval.Second, starttime, Now))
         If Command() = "" Then Console.ReadKey(True)
     End Sub
 
