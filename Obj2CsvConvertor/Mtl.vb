@@ -54,7 +54,7 @@
         If Not Buffer = "" Then Materials.Add(New Material(Buffer))
     End Sub
 
-    Public Function Find(ByVal Name As String)
+    Public Function Find(ByVal Name As String) As Material
         For Each Current As Material In Materials
             If Current.Name = Name Then Return Current
         Next

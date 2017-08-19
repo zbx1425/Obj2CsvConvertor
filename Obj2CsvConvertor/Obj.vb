@@ -126,13 +126,21 @@
                 Case "usemtl"
                     Currentmtl = vns(1)
                 Case "o"
-
+                    Console.WriteLine("正在读入分组 {0} ……", vns(1))
                 Case "g"
-
+                    Console.WriteLine("正在读入分组 {0} ……", vns(1))
                 Case Else
                     Throw New ObjFormatException("不支持或非法的指令：" & Current)
             End Select
         Next
     End Sub
+
+    Public Function Find(ByVal Name As String) As List(Of Face)
+        Dim output As New List(Of Face)
+        For Each Current As Face In Faces
+            If Current.Material = Name Then output.Add(Current)
+        Next
+        Return output
+    End Function
 
 End Class
