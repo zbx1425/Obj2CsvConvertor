@@ -58,6 +58,6 @@
         For Each Current As Material In Materials
             If Current.Name = Name Then Return Current
         Next
-        Throw New Obj.ObjFormatException("与材质对应的MTL未载入。请在导出时选择""导出材质库""。")
+        Throw New Obj.ObjFormatException(StringResource.ErrorMatLibNotLoaded)
     End Function
 End Class

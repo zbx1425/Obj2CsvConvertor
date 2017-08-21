@@ -13,7 +13,7 @@
 
         Public Sub New(ByVal Description As String)
             Dim vns As String() = Description.Split(" ")
-            If vns(0) <> "v" Then Throw New ObjFormatException("指令格式不正确。")
+            If vns(0) <> "v" Then Throw New ObjFormatException(StringResource.ErrorWrongInstruction)
             x = vns(1)
             y = vns(2)
             z = vns(3)
@@ -31,7 +31,7 @@
 
         Public Sub New(ByVal Description As String)
             Dim vns As String() = Description.Split(" ")
-            If vns(0) <> "vt" Then Throw New ObjFormatException("指令格式不正确。")
+            If vns(0) <> "vt" Then Throw New ObjFormatException(StringResource.ErrorWrongInstruction)
             u = vns(1)
             v = vns(2)
         End Sub
@@ -47,7 +47,7 @@
 
         Public Sub New(ByVal Description As String)
             Dim vns As String() = Description.Split(" ")
-            If vns(0) <> "v" Then Throw New ObjFormatException("指令格式不正确。")
+            If vns(0) <> "v" Then Throw New ObjFormatException(StringResource.ErrorWrongInstruction)
             x = vns(1)
             y = vns(2)
             z = vns(3)
@@ -68,7 +68,7 @@
 
         Public Sub New(ByVal Description As String, ByVal mtl As String)
             Dim vns As String() = Description.Split(" ")
-            If vns(0) <> "f" Then Throw New ObjFormatException("指令格式不正确。")
+            If vns(0) <> "f" Then Throw New ObjFormatException(StringResource.ErrorWrongInstruction)
             ReDim VertexIndices(vns.Length - 2), TextureCoordinateIndices(vns.Length - 2), NormalIndices(vns.Length - 2)
             For i As Integer = 1 To vns.Length - 1
                 Dim dfs As String() = vns(i).Split("/")
@@ -77,7 +77,7 @@
                 NormalIndices(i - 1) = -1
                 Select Case dfs.Length
                     Case 0
-                        Throw New ObjFormatException("面定义非法，请检查空格。")
+                        Throw New ObjFormatException(StringResource.ErrorMissingVertex)
                     Case 1
                         VertexIndices(i - 1) = dfs(0) - 1
                     Case 2
@@ -106,7 +106,8 @@
         Dim lns As String() = Description.Split(newline)
         Dim Currentmtl As String = ""
         For Each Current As String In lns
-            If Current.Trim() = "" Then Continue For
+            Current = Current.Trim.Replace("  ", " ")
+            If Current = "" Then Continue For
             If Current.StartsWith("#"c) Then Continue For
             Dim vns As String() = Current.Split(" ")
             Select Case vns(0).ToLower.Trim
@@ -117,20 +118,20 @@
                 Case "vn"
                     Normals.Add(New Normal(Current))
                 Case "vp"
-                    Throw New ObjFormatException("本转换器只支持简单面。请在导出时选择""不使用曲面""")
+                    Throw New ObjFormatException(StringResource.ErrorCurveVertex)
                 Case "f"
                     Faces.Add(New Face(Current, Currentmtl))
                 Case "mtllib"
-                    If Not IO.File.Exists(vns(1)) Then Throw New IO.FileNotFoundException("没有找到MTL文件。请重新导出。")
+                    If Not IO.File.Exists(vns(1)) Then Throw New IO.FileNotFoundException(StringResource.ErrorMatLibNotFound)
                     MaterialLib.Parse(My.Computer.FileSystem.ReadAllText(vns(1), System.Text.Encoding.UTF8))
                 Case "usemtl"
                     Currentmtl = vns(1)
                 Case "o"
-                    Console.WriteLine("正在读入分组 {0} ……", vns(1))
+                    Console.WriteLine(StringResource.ReadingGroup, vns(1))
                 Case "g"
-                    Console.WriteLine("正在读入分组 {0} ……", vns(1))
+                    Console.WriteLine(StringResource.ReadingGroup, vns(1))
                 Case Else
-                    Throw New ObjFormatException("不支持或非法的指令：" & Current)
+                    Throw New ObjFormatException(Format(StringResource.ErrorUnknownCommand, Current))
             End Select
         Next
     End Sub

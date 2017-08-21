@@ -52,7 +52,7 @@ Public Class Csv
                     vis.Add(idx)
                 Next
                 Faces.Add(New Face(vis))
-                If Faces.Count Mod 100 = 0 Then Console.WriteLine("已载入 {0} / {1} 个面。", Faces.Count, fl.Count)
+                If Faces.Count Mod 100 = 0 Then Console.WriteLine(StringResource.MeshConverting, Faces.Count, fl.Count)
             Next
             Material = m
         End Sub
@@ -123,7 +123,7 @@ Public Class Csv
     Public Sub New(ByVal o As Obj)
         For Each Current As Mtl.Material In o.MaterialLib.Materials
             Meshes.Add(New Mesh(Current, o))
-            Console.WriteLine("材质 {0} 对应面顶点转换完成。", Current.Name)
+            Console.WriteLine(StringResource.MeshConverted, Current.Name)
         Next
     End Sub
 
@@ -132,7 +132,7 @@ Public Class Csv
         For i As Integer = 0 To Meshes.Count - 1
             total += Meshes(i).Export(writer)
             writer.Flush()
-            Console.WriteLine("材质 {0} 对应面导出完成，已导出 {1} 个面。", Meshes(i).Material.Name, total)
+            Console.WriteLine(StringResource.MeshExported, Meshes(i).Material.Name, total)
         Next
         Return total
     End Function
