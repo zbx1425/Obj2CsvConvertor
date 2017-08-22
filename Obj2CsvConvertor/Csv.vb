@@ -136,4 +136,18 @@ Public Class Csv
         Next
         Return total
     End Function
+
+    Public Shared Function Convert(ByVal o As Obj, ByRef writer As IO.StreamWriter) As Integer
+        Dim total As Integer = 0
+        For Each Current As Mtl.Material In o.MaterialLib.Materials
+            Dim m As New Mesh(Current, o)
+            Console.WriteLine(StringResource.MeshConverted, Current.Name)
+            total += m.Export(writer)
+            writer.Flush()
+            Console.WriteLine(StringResource.MeshExported, m.Material.Name, total)
+            m = Nothing
+            GC.Collect()
+        Next
+        Return total
+    End Function
 End Class
