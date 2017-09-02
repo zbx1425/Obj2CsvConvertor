@@ -3,7 +3,7 @@ Imports Obj2CsvConvertor.Obj
 
 Public Class Csv
 
-    Public Class Vertex
+    Public Structure Vertex
         Public vx, vy, vz As Double
         Public nx, ny, nz As Double
         Public tu, tv As Double
@@ -14,28 +14,28 @@ Public Class Csv
             tu = t.u : tv = t.v
         End Sub
 
-        Public Overrides Function Equals(ByVal obj As Object) As Boolean
-            If obj.GetType IsNot GetType(Vertex) Then Return False
-            Return obj.vx = Me.vx AndAlso obj.vy = Me.vy AndAlso obj.vz = Me.vz AndAlso _
-            If(Double.IsNaN(Me.nx), Double.IsNaN(obj.nx), obj.nx = Me.nx AndAlso obj.ny = Me.ny AndAlso obj.nz = Me.nz) AndAlso _
-            If(Double.IsNaN(Me.tu), Double.IsNaN(obj.tu), obj.tu = Me.tu AndAlso obj.tv = Me.tv)
-        End Function
-    End Class
+        'Public Overrides Function Equals(ByVal obj As Object) As Boolean
+        '    If obj.GetType IsNot GetType(Vertex) Then Return False
+        '    Return obj.vx = Me.vx AndAlso obj.vy = Me.vy AndAlso obj.vz = Me.vz AndAlso _
+        '    If(Double.IsNaN(Me.nx), Double.IsNaN(obj.nx), obj.nx = Me.nx AndAlso obj.ny = Me.ny AndAlso obj.nz = Me.nz) AndAlso _
+        '    If(Double.IsNaN(Me.tu), Double.IsNaN(obj.tu), obj.tu = Me.tu AndAlso obj.tv = Me.tv)
+        'End Function
+    End Structure
 
-    Public Class Face
-        Public VertexIndicies As New List(Of Integer)
+    Public Structure Face
+        Public VertexIndicies As List(Of Integer)
 
         Public Sub New(ByVal ls As List(Of Integer))
             VertexIndicies = ls
         End Sub
-    End Class
+    End Structure
 
     Public Class Mesh
         Public Vertices As New List(Of Vertex)
         Public Faces As New List(Of Face)
         Public Material As Mtl.Material
 
-        Public Sub New(ByVal m As Mtl.Material, ByVal o As Obj)
+        Public Sub New(ByVal m As Mtl.Material, ByVal o As Obj, Optional ByRef Preference As ConvertOption = Nothing)
             Dim fl As List(Of Obj.Face) = o.Find(m.Name)
             For Each Current As Obj.Face In fl
                 Dim vis As New List(Of Integer)
@@ -44,15 +44,20 @@ Public Class Csv
                     Dim na As Obj.Normal = If(Current.NormalIndices(i) = -1, New Obj.Normal(), o.Normals(Current.NormalIndices(i)))
                     Dim ta As Obj.TextureCoordinate = If(Current.TextureCoordinateIndices(i) = -1, New Obj.TextureCoordinate(), o.TextureCoordinates(Current.TextureCoordinateIndices(i)))
                     Dim vt As Vertex = New Vertex(va, na, ta)
-                    Dim idx As Integer = Vertices.IndexOf(vt)
-                    If idx = -1 Then
-                        idx = Vertices.Count
+                    If Preference Is Nothing OrElse Not Preference.DisableVertexCombain Then
+                        Dim idx As Integer = Vertices.IndexOf(vt)
+                        If idx = -1 Then
+                            idx = Vertices.Count
+                            Vertices.Add(vt)
+                        End If
+                        vis.Add(idx)
+                    Else
+                        vis.Add(Vertices.Count)
                         Vertices.Add(vt)
                     End If
-                    vis.Add(idx)
                 Next
                 Faces.Add(New Face(vis))
-                If Faces.Count Mod 100 = 0 Then Console.WriteLine(StringResource.MeshConverting, Faces.Count, fl.Count)
+                If Faces.Count Mod 100 = 0 Then Log.WriteLine(Language.Translate("ConsoleRuntime.MeshConverting"), Faces.Count, fl.Count)
             Next
             Material = m
         End Sub
@@ -120,10 +125,10 @@ Public Class Csv
 
     Public Meshes As New List(Of Mesh)
 
-    Public Sub New(ByVal o As Obj)
+    Public Sub New(ByVal o As Obj, Optional ByRef Preference As ConvertOption = Nothing)
         For Each Current As Mtl.Material In o.MaterialLib.Materials
-            Meshes.Add(New Mesh(Current, o))
-            Console.WriteLine(StringResource.MeshConverted, Current.Name)
+            Meshes.Add(New Mesh(Current, o, Preference))
+            Log.WriteLine(Language.Translate("ConsoleRuntime.MeshConverted"), Current.Name)
         Next
     End Sub
 
@@ -132,19 +137,19 @@ Public Class Csv
         For i As Integer = 0 To Meshes.Count - 1
             total += Meshes(i).Export(writer)
             writer.Flush()
-            Console.WriteLine(StringResource.MeshExported, Meshes(i).Material.Name, total)
+            Log.WriteLine(Language.Translate("ConsoleRuntime.MeshExported"), Meshes(i).Material.Name, total)
         Next
         Return total
     End Function
 
-    Public Shared Function Convert(ByVal o As Obj, ByRef writer As IO.StreamWriter) As Integer
+    Public Shared Function Convert(ByVal o As Obj, ByRef writer As IO.StreamWriter, Optional ByRef Preference As ConvertOption = Nothing) As Integer
         Dim total As Integer = 0
         For Each Current As Mtl.Material In o.MaterialLib.Materials
-            Dim m As New Mesh(Current, o)
-            Console.WriteLine(StringResource.MeshConverted, Current.Name)
+            Dim m As New Mesh(Current, o, Preference)
+            Log.WriteLine(Language.Translate("ConsoleRuntime.MeshConverted"), Current.Name)
             total += m.Export(writer)
             writer.Flush()
-            Console.WriteLine(StringResource.MeshExported, m.Material.Name, total)
+            Log.WriteLine(Language.Translate("ConsoleRuntime.MeshExported"), m.Material.Name, total)
             m = Nothing
             GC.Collect()
         Next
